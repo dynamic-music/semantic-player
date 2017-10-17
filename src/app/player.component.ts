@@ -1,14 +1,12 @@
-import { Component, Inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { LoadingController, Loading } from 'ionic-angular';
 
-import { DymoManager, GlobalVars, UIControl, uris } from 'dymo-core';
+import { DymoManager, GlobalVars, UIControl, uris, SensorControl } from 'dymo-core';
 
 import { ConfigService } from './config.service';
 import { FetchService } from './fetch.service';
 import { InnoyicSliderWrapper } from './innoyic-slider-wrapper';
-
-import { Acceleration } from './app.module';
-import { Observable } from 'rxjs/Observable';
+import { AccelerationService } from './acceleration.service';
 
 interface DymoConfig {
   name: string,
@@ -35,7 +33,7 @@ export class PlayerComponent {
   constructor(private loadingController: LoadingController,
     private configService: ConfigService,
     private fetcher: FetchService,
-    @Inject('AccelerationObservable') private acceleration: Observable<Acceleration>
+    private acceleration: AccelerationService
   ) { }
 
   ngOnInit(): void {
@@ -62,19 +60,19 @@ export class PlayerComponent {
             .map(c => new InnoyicSliderWrapper(<UIControl>c));
           this.toggles = <UIControl[]>l.controls.filter(c => c.getType() === uris.TOGGLE);
           this.buttons = <UIControl[]>l.controls.filter(c => c.getType() === uris.BUTTON);
-          const sensors = this.manager.getSensorControls() as any[]; // TODO SensorControl
+          const sensors = this.manager.getSensorControls() as SensorControl[]; // TODO SensorControl
           const x = sensors.filter(sensor => sensor.getType() === uris.ACCELEROMETER_X)[0]; // check exists
           const y = sensors.filter(sensor => sensor.getType() === uris.ACCELEROMETER_Y)[0]; // check exists
           const z = sensors.filter(sensor => sensor.getType() === uris.ACCELEROMETER_Z)[0]; // check exists
 
           x.setSensor({
-            watch: this.acceleration.map(val => val.x)
+            watch: this.acceleration.watchX
           });
           y.setSensor({
-            watch: this.acceleration.map(val => val.y)
+            watch: this.acceleration.watchY
           });
           z.setSensor({
-            watch: this.acceleration.map(val => val.z)
+            watch: this.acceleration.watchZ
           });
 
           this.updateLoading();
