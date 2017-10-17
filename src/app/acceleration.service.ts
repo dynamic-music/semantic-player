@@ -13,7 +13,7 @@ export interface AccelerationWatcher {
   z: Observable<number>;
 }
 
-export function createAccelerationObservable(
+export function createDeviceMotionAccelerationObservable(
   windowObj: Window
 ): Observable<Acceleration> {
   // This isn't really idiomatic angular (the use of browser specific events and window object)
@@ -27,6 +27,16 @@ export function createAccelerationObservable(
     })).share();
 }
 
+export function createAccelerationWatcherFrom(
+  acceleration: Observable<Acceleration>
+): AccelerationWatcher {
+  return {
+    x: acceleration.map(acceleration => acceleration.x),
+    y: acceleration.map(acceleration => acceleration.y),
+    z: acceleration.map(acceleration => acceleration.z)
+  };
+}
+
 export function createStubAccelerationObservable(): Observable<Acceleration> {
   const getRandomAxisAcceleration = (g: number) => -g + Math.random() * 2 * g;
   return Observable.interval(300).map(() => ({
@@ -37,7 +47,7 @@ export function createStubAccelerationObservable(): Observable<Acceleration> {
 }
 
 @Injectable()
-export abstract class AccelerationService {
+export class AccelerationService {
   public watchX: Observable<number>;
   public watchY: Observable<number>;
   public watchZ: Observable<number>;
@@ -49,30 +59,6 @@ export abstract class AccelerationService {
   }
 }
 
-@Injectable()
-export class DeviceMotionAccelerationService extends AccelerationService {
-  constructor(windowObj: Window) {
-    const acceleration = createAccelerationObservable(windowObj);
-    super({
-      x: acceleration.map(acceleration => acceleration.x),
-      y: acceleration.map(acceleration => acceleration.y),
-      z: acceleration.map(acceleration => acceleration.z)
-    });
-  }
-}
-
-export function toDeviceMotionServiceFactoryWith(windowObj: Window) {
-  return () => new DeviceMotionAccelerationService(windowObj);
-}
-
-@Injectable()
-export class StubAccelerationService extends AccelerationService {
-  constructor() {
-    const acceleration = createStubAccelerationObservable();
-    super({
-      x: acceleration.map(acceleration => acceleration.x),
-      y: acceleration.map(acceleration => acceleration.y),
-      z: acceleration.map(acceleration => acceleration.z)
-    });
-  }
+export function toAccelerationServiceFactoryWith(watcher: AccelerationWatcher) {
+  return () => new AccelerationService(watcher);
 }

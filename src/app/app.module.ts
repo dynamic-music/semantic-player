@@ -12,7 +12,9 @@ import { ConfigService } from './config.service';
 import { FetchService } from './fetch.service';
 import { 
   AccelerationService,
-  toDeviceMotionServiceFactoryWith
+  createAccelerationWatcherFrom,
+  createDeviceMotionAccelerationObservable,
+  toAccelerationServiceFactoryWith
 } from './acceleration.service';
 
 @NgModule({
@@ -36,7 +38,14 @@ import {
     ConfigService,
     FetchService,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    {provide: AccelerationService, useFactory: toDeviceMotionServiceFactoryWith(window)}
+    {
+      provide: AccelerationService,
+      useFactory: toAccelerationServiceFactoryWith(
+        createAccelerationWatcherFrom(
+          createDeviceMotionAccelerationObservable(window)
+        )
+      )
+    }
   ]
 })
 export class AppModule {}
