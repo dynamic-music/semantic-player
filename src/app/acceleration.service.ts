@@ -38,11 +38,10 @@ export function createAccelerationWatcherFrom(
 }
 
 export function createStubAccelerationObservable(): Observable<Acceleration> {
-  const getRandomAxisAcceleration = (g: number) => -g + Math.random() * 2 * g;
   return Observable.interval(300).map(() => ({
-    x: getRandomAxisAcceleration(9.81),
-    y: getRandomAxisAcceleration(9.81),
-    z: getRandomAxisAcceleration(9.81)
+    x: Math.random(),
+    y: Math.random(),
+    z: Math.random()
   })).share();
 }
 
