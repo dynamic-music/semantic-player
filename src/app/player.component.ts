@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { LoadingController, Loading } from 'ionic-angular';
 
-import { DymoManager, GlobalVars, UIControl, uris, SensorControl } from 'dymo-core';
+import { DymoManager, GlobalVars, UIControl, uris } from 'dymo-core';
 
 import { ConfigService } from './config.service';
 import { FetchService } from './fetch.service';
@@ -60,23 +60,21 @@ export class PlayerComponent {
             .map(c => new InnoyicSliderWrapper(<UIControl>c));
           this.toggles = <UIControl[]>l.controls.filter(c => c.getType() === uris.TOGGLE);
           this.buttons = <UIControl[]>l.controls.filter(c => c.getType() === uris.BUTTON);
-          const sensors = this.manager.getSensorControls() as SensorControl[]; // TODO SensorControl
-          const x = sensors.filter(sensor => sensor.getType() === uris.ACCELEROMETER_X)[0]; // check exists
-          const y = sensors.filter(sensor => sensor.getType() === uris.ACCELEROMETER_Y)[0]; // check exists
-          const z = sensors.filter(sensor => sensor.getType() === uris.ACCELEROMETER_Z)[0]; // check exists
-
-          x.setSensor({
-            watch: this.acceleration.watchX
-          });
-          y.setSensor({
-            watch: this.acceleration.watchY
-          });
-          z.setSensor({
-            watch: this.acceleration.watchZ
-          });
 
           this.updateLoading();
-          x.startUpdate();
+          const watcherLookup = new Map([
+            [uris.ACCELEROMETER_X, this.acceleration.watchX],
+            [uris.ACCELEROMETER_Y, this.acceleration.watchY],
+            [uris.ACCELEROMETER_Z, this.acceleration.watchZ],
+          ]);
+          this.manager.getSensorControls().forEach(control => {
+            if (watcherLookup.has(control.getType())) {
+              control.setSensor({
+                watch: watcherLookup.get(control.getType())
+              });
+              control.startUpdate();
+            }
+          });
         });
     }
   }
