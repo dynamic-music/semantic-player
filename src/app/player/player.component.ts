@@ -24,8 +24,8 @@ import * as _ from 'lodash';
 })
 export class PlayerComponent {
 
-  protected config: PlayerConfig = {};
-  protected showSensorData: boolean;
+  public config: PlayerConfig = {};
+  public showSensorData: boolean;
   private loading: Promise<HTMLIonLoadingElement>;
   private sensors: SensorControl[];
   private sliders: InnoyicSliderWrapper[];
